@@ -1,0 +1,23 @@
+{
+  "skill_name": "voice-dna",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I dropped a folder of my old posts at ~/writing/posts (txt and a couple pdfs). Build a voice profile from them and rewrite this so it sounds like me, not like a cleaned-up chatbot: Additionally, the release process serves as a robust mechanism for ensuring reliability, highlighting our ongoing commitment to operational excellence.",
+      "expected_output": "A profile.json with skeletons and no raw topic words, plus a rewrite whose score is closer to the profile than the AI draft. Facts in the draft survive. The humanizer After-style neutral sentence is not the result.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Here are two paragraphs I actually wrote. Don't copy what they're about, copy the rhythm, and fix this paragraph that sounds like ChatGPT. [samples]. [draft].",
+      "expected_output": "Stdin or temp-file scan, rewrite guided by skeletons, score run once, revision only if a metric is off.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Humanize this email in my voice. Profile should already be at ~/.config/voice-dna/profile.json. Don't rescan.",
+      "expected_output": "Existing profile reused. No home-directory scan. Final email plus a one-line score note.",
+      "files": []
+    }
+  ]
+}
