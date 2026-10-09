@@ -43,3 +43,6 @@
 [submodule "packages/google-voice-mcp"]
 	path = packages/google-voice-mcp
 	url = https://github.com/ml-lubich/google-voice-mcp.git
+[submodule "packages/brain"]
+	path = packages/brain
+	url = https://github.com/ml-lubich/brain.git
