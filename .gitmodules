@@ -46,3 +46,6 @@
 [submodule "packages/brain"]
 	path = packages/brain
 	url = https://github.com/ml-lubich/brain.git
+[submodule "packages/teams-mcp"]
+	path = packages/teams-mcp
+	url = https://github.com/ml-lubich/teams-mcp.git
