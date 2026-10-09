@@ -116,8 +116,8 @@ def test_real_step_order_and_flags():
     assert [s.key for s in steps] == init_mod.STEP_KEYS
     assert [s.key for s in steps][-1] == "doctor" and not steps[-1].ask
     brain = next(s for s in steps if s.key == "brain")
-    assert not brain.recommended and not brain.default_yes
-    assert all(s.recommended for s in steps if s.key != "brain")
+    assert brain.recommended and brain.default_yes
+    assert all(s.recommended for s in steps)
 
 
 @pytest.fixture

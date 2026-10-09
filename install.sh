@@ -20,9 +20,12 @@ if ! command -v uv >/dev/null 2>&1; then
   echo "==> install uv"
   if [ "$DRY" != 1 ]; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    PATH="$HOME/.local/bin:$PATH"
   fi
 fi
+# uv tool installs land in ~/.local/bin, which may not be on PATH even when uv already was.
+PATH="$HOME/.local/bin:$PATH"
+export PATH
+echo "==> if \`superai-skills\` is not found in new shells, run: uv tool update-shell"
 
 if [ -d "$DIR/.git" ]; then
   step git -C "$DIR" pull --ff-only

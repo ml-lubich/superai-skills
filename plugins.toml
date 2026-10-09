@@ -7,8 +7,8 @@ repo = "Yeachan-Heo/oh-my-claudecode"
 tier = "default"
 
 [[plugin]]
-id = "superpowers@superpowers-dev"
-repo = "obra/superpowers"
+id = "superpowers@superpowers-marketplace"
+repo = "obra/superpowers-marketplace"
 tier = "default"
 
 [[plugin]]
@@ -59,76 +59,6 @@ tier = "optional"
 [[plugin]]
 id = "claude-tiers@claude-tiers"
 repo = "ml-lubich/claude-tiers"
-tier = "optional"
-
-# --- popular add-ons (default) ---
-
-[[plugin]]
-id = "andrej-karpathy-skills@karpathy-skills"
-repo = "multica-ai/andrej-karpathy-skills"
-tier = "default"
-
-[[plugin]]
-id = "mattpocock-skills@mattpocock"
-repo = "mattpocock/skills"
-tier = "default"
-
-[[plugin]]
-id = "agent-skills@addy-agent-skills"
-repo = "addyosmani/agent-skills"
-tier = "default"
-
-[[plugin]]
-id = "taste-skill@taste-skill"
-repo = "Leonxlnx/taste-skill"
-tier = "default"
-
-[[plugin]]
-id = "ui-ux-pro-max@ui-ux-pro-max-skill"
-repo = "nextlevelbuilder/ui-ux-pro-max-skill"
-tier = "default"
-
-[[plugin]]
-id = "planning-with-files@planning-with-files"
-repo = "OthmanAdi/planning-with-files"
-tier = "default"
-
-[[plugin]]
-id = "caveman@caveman"
-repo = "JuliusBrussee/caveman"
-tier = "default"
-
-[[plugin]]
-id = "claude-hud@claude-hud"
-repo = "jarrodwatts/claude-hud"
-tier = "default"
-
-# --- popular add-ons (optional: need accounts, CLIs or are heavy) ---
-# beads needs the `bd` CLI; codex needs an OpenAI login.
-
-[[plugin]]
-id = "codex@openai-codex"
-repo = "openai/codex-plugin-cc"
-tier = "optional"
-
-[[plugin]]
-id = "beads@beads-marketplace"
-repo = "gastownhall/beads"
-tier = "optional"
-
-[[plugin]]
-id = "agentmemory@agentmemory"
-repo = "rohitg00/agentmemory"
-tier = "optional"
-
-[[plugin]]
-id = "document-skills@anthropic-agent-skills"
-repo = "anthropics/skills"
-tier = "optional"
-
-[[plugin]]
-id = "repomix-mcp@repomix"
-repo = "yamadashy/repomix"
 tier = "optional"
 
 # Never installed (personal / niche / disabled). A test pins that none appear above.

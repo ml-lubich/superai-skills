@@ -35,7 +35,7 @@ def ledger() -> list[dict]:
 
 
 def contacted(led: list[dict]) -> set[str]:
-    return {x["email"].lower() for x in led}
+    return {x["email"].lower() for x in led if x.get("email")}
 
 
 def addr(sender: str) -> str:

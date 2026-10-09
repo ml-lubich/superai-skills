@@ -34,9 +34,14 @@ def resolve_bitbucket(flag: Optional[bool], detected: bool) -> bool:
 
 def _git_urls(repo: Path) -> List[str]:
     # Read .git/config directly: no subprocess, so --dry-run stays side-effect free.
-    cfg = repo / ".git" / "config"
+    # .git may be a file ("gitdir: ...") in worktrees and submodules.
+    git = repo / ".git"
     try:
-        lines = cfg.read_text().splitlines()
+        if git.is_file():
+            git = (repo / git.read_text().split(":", 1)[1].strip()).resolve()
+            if (git / "commondir").is_file():
+                git = (git / (git / "commondir").read_text().strip()).resolve()
+        lines = (git / "config").read_text().splitlines()
     except OSError:
         return []
     return [ln.strip() for ln in lines if ln.strip().startswith("url")]
@@ -126,9 +131,9 @@ def _iterm2(dry_run: bool) -> Result:
     return _aggregate("iterm2", [app.status, prof.status], dry_run, detail)
 
 
-def _plugins(dry_run: bool) -> Result:
+def _plugins(dry_run: bool, tier: str = "default") -> Result:
     from super_ai_skills import plugins
-    res = plugins.install_plugins("default", dry_run)
+    res = plugins.install_plugins(tier, dry_run)
     bad = "; ".join(f"{r.name}: {r.detail}" for r in res if r.status == "fail")
     return _aggregate("plugins", [r.status for r in res], dry_run, bad)
 
@@ -169,7 +174,7 @@ STEP_KEYS = ["brew", "bb", "ai-clis", "ohmyzsh", "powerlevel10k", "zsh-plugins",
              "iterm2", "plugins", "tools", "skills", "brain", "doctor"]
 
 
-def build_steps(with_brain_daemon: bool = False) -> List[Step]:
+def build_steps(with_brain_daemon: bool = False, plugins: str = "default") -> List[Step]:
     steps = [
         Step("brew", "Dev tools", "Installs uv, Homebrew/apt packages (git, gh, jq, ripgrep, fzf...) and Python.",
              True, True, _brew),
@@ -187,25 +192,25 @@ def build_steps(with_brain_daemon: bool = False) -> List[Step]:
         Step("iterm2", "iTerm2 + profile", "Installs iTerm2 (macOS) and a profile using the Nerd Font.",
              True, True, _iterm2),
         Step("plugins", "Claude Code plugins", "Installs the default set of Claude Code plugins.",
-             True, True, _plugins),
+             True, True, lambda d: _plugins(d, plugins)),
         Step("tools", "CLI/MCP add-ons", "Installs the default add-ons from tools.toml (skips what you have).",
              True, True, _tools),
         Step("skills", "Agent skills", "Links the bundled skills into Claude, Cursor, Codex and Gemini.",
              True, True, _skills),
-        Step("brain", "Brain daemon", "Optional personal knowledge/inbox agent; most people do not need it.",
-             with_brain_daemon, with_brain_daemon, lambda d: _brain(d, with_brain_daemon)),
+        Step("brain", "Brain agent", "Installs the open-brain `brain` CLI; its launchd daemon only with --with-brain-daemon.",
+             True, True, lambda d: _brain(d, with_brain_daemon)),
         Step("doctor", "Health check", "Verifies what is installed.", True, True, _doctor, ask=False),
     ]
     return steps
 
 
 def run_init(dry_run: bool = False, bitbucket: Optional[bool] = None, with_brain_daemon: bool = False,
-             skip_plugins: bool = False, yes: bool = False, no_input: bool = False,
+             skip_plugins: bool = False, plugins: str = "default", yes: bool = False, no_input: bool = False,
              only: Optional[List[str]] = None, skip: Optional[List[str]] = None,
              **wizard_kw) -> List[Result]:
     use_bb = resolve_bitbucket(bitbucket, detect_bitbucket_here() if bitbucket is None else False)
     skip = list(skip or []) + (["plugins"] if skip_plugins else [])
     if not use_bb and "bb" not in (only or []):
         skip.append("bb")
-    return run_wizard(build_steps(with_brain_daemon), yes=yes, no_input=no_input,
+    return run_wizard(build_steps(with_brain_daemon, plugins), yes=yes, no_input=no_input,
                       only=only, skip=skip, dry_run=dry_run, **wizard_kw)

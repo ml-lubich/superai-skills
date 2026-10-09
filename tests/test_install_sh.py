@@ -101,5 +101,25 @@ def test_dry_run_passes_flags_in_plan(env):
 
 
 def test_no_personal_strings():
-    text = open(SCRIPT).read()
-    assert not re.search(r"mlubich|michaelle|lupfr|metropol|mishalubich|misha|/Users/", text, re.I)
+    deny = os.environ.get("SUPERAI_DENYLIST", "/Users/mlubich/dev/.open-brain-denylist.txt")
+    if not os.path.exists(deny):
+        pytest.skip("denylist file not present")
+    words = [w.strip() for w in open(deny).read().splitlines() if w.strip()]
+    # the clone URL of this (already public) repo is the one allowed handle hit
+    text = open(SCRIPT).read().replace("ml-lubich/superai-skills", "")
+    assert not re.search("|".join(re.escape(w) for w in words), text, re.I)
+
+
+def test_local_bin_on_path_when_uv_preinstalled(env, tmp_path):
+    """uv already on PATH elsewhere, ~/.local/bin absent from PATH: init must still resolve."""
+    e, log = env
+    home = tmp_path / "home"
+    lb = home / ".local" / "bin"
+    lb.mkdir(parents=True)
+    # tool install drops superai-skills into ~/.local/bin; remove it from the PATH stub dir
+    src = tmp_path / "bin" / "superai-skills"
+    shutil.move(str(src), str(lb / "superai-skills"))
+    r = run(e)
+    assert r.returncode == 0, r.stderr
+    assert calls(log)[-1] == "superai-skills init"
+    assert "update-shell" in r.stdout

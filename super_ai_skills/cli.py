@@ -164,13 +164,15 @@ def _keys(ctx, param, value):
 @click.option("--bitbucket/--no-bitbucket", default=None, help="Force or skip the Bitbucket CLI (default: auto-detect).")
 @click.option("--with-brain-daemon", is_flag=True, help="Also install the brain daemon (macOS); on by default for that step.")
 @click.option("--skip-plugins", is_flag=True, help="Same as --skip plugins.")
-def init(yes, no_input, only, skip, dry_run, bitbucket, with_brain_daemon, skip_plugins):
+@click.option("--plugins", "plugins", type=click.Choice(["default", "all"]), default="default", show_default=True,
+              help="Plugin tier: default, or all (adds optional ones that need their own accounts).")
+def init(yes, no_input, only, skip, dry_run, bitbucket, with_brain_daemon, skip_plugins, plugins):
     """Guided setup wizard: shell, terminal, AI CLIs, plugins, tools, skills, doctor.
 
     Steps: brew, bb, ai-clis, ohmyzsh, powerlevel10k, zsh-plugins, iterm2, plugins, tools, skills, brain, doctor.
     """
     from super_ai_skills.init import run_init
-    results = run_init(dry_run, bitbucket, with_brain_daemon, skip_plugins, yes, no_input, only, skip)
+    results = run_init(dry_run, bitbucket, with_brain_daemon, skip_plugins, plugins, yes, no_input, only, skip)
     if any(r.status == "fail" for r in results):
         sys.exit(1)
 

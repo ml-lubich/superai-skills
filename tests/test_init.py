@@ -45,6 +45,44 @@ def test_flag_overrides_detection():
     assert init_mod.resolve_bitbucket(None, False) is False
 
 
+def test_git_urls_handles_gitfile_worktree(tmp_path):
+    real = tmp_path / "main" / ".git"
+    (real / "worktrees" / "w").mkdir(parents=True)
+    (real / "config").write_text('[remote "origin"]\n\turl = git@bitbucket.org:a/b.git\n')
+    wt = tmp_path / "wt"
+    wt.mkdir()
+    (wt / ".git").write_text(f"gitdir: {real / 'worktrees' / 'w'}\n")
+    (real / "worktrees" / "w" / "commondir").write_text("../..\n")
+    assert any("bitbucket" in u for u in init_mod._git_urls(wt))
+
+
+def test_git_urls_handles_submodule_gitfile(tmp_path):
+    gd = tmp_path / "super" / ".git" / "modules" / "sub"
+    gd.mkdir(parents=True)
+    (gd / "config").write_text("[remote \"origin\"]\n\turl = https://bitbucket.org/a/b\n")
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (sub / ".git").write_text(f"gitdir: {gd}\n")
+    assert any("bitbucket" in u for u in init_mod._git_urls(sub))
+
+
+def test_plugins_flag_passed_through(monkeypatch):
+    seen = []
+    monkeypatch.setattr(init_mod, "run_init", lambda *a, **k: seen.append(a[4]) or [])
+    for args, want in ((["--plugins", "all"], "all"), ([], "default")):
+        assert CliRunner().invoke(cli, ["init", *args]).exit_code == 0
+        assert seen[-1] == want
+    assert CliRunner().invoke(cli, ["init", "--plugins", "bogus"]).exit_code != 0
+
+
+def test_run_init_plugins_tier_reaches_step(monkeypatch):
+    seen = []
+    monkeypatch.setattr("super_ai_skills.plugins.install_plugins",
+                        lambda tier, dry_run: seen.append(tier) or [])
+    r = init_mod._plugins(True, "all")
+    assert seen == ["all"] and r.status == "dry-run"
+
+
 # --- CLI ---------------------------------------------------------------
 def test_help_flags():
     r = CliRunner()
@@ -86,11 +124,12 @@ def test_skip_plugins(stub_steps):
     assert "_plugins" not in stub_steps
 
 
-def test_brain_is_optional_unless_flag(stub_steps):
+def test_brain_package_always_installed_daemon_only_with_flag(stub_steps, monkeypatch):
+    seen = []
+    monkeypatch.setattr(init_mod, "_brain", lambda d, daemon=False: seen.append(daemon) or init_mod.Result("brain", "ok"))
     CliRunner().invoke(cli, ["init", "-y"])
-    assert "_brain" not in stub_steps
     CliRunner().invoke(cli, ["init", "-y", "--with-brain-daemon"])
-    assert "_brain" in stub_steps
+    assert seen == [False, True]
 
 
 def test_step_failure_exit_1_but_continues(stub_steps, monkeypatch):
